@@ -1,4 +1,4 @@
-package com.pankaj.mvm.config;
+package com.pankaj.mvm.entity;
 
 import com.pankaj.mvm.entity.User;
 import com.pankaj.mvm.enums.AccountStatus;
