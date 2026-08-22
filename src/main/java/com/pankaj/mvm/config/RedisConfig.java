@@ -1,5 +1,3 @@
-package com.pankaj.mvm.config;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,24 +5,48 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.net.URI;
+
 @Configuration
 public class RedisConfig {
 
-    @Value("${spring.data.redis.host:localhost}")
-    private String redisHost;
-
-    @Value("${spring.data.redis.port:6379}")
-    private int redisPort;
+    @Value("${REDIS_URL:#{null}}")
+    private String redisUrl;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(redisHost, redisPort);
-        return new LettuceConnectionFactory(configuration);
+        // Fallback for local development if REDIS_URL is not provided
+        if (redisUrl == null || redisUrl.isEmpty()) {
+            RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration("localhost", 6379);
+            return new LettuceConnectionFactory(configuration);
+        }
+
+        // Parse Upstash URL cleanly for Render
+        URI uri = URI.create(redisUrl);
+        String host = uri.getHost();
+        int port = uri.getPort();
+        String userInfo = uri.getUserInfo();
+        String password = (userInfo != null && userInfo.contains(":")) ? userInfo.split(":")[1] : userInfo;
+
+        RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration(host, port);
+        if (password != null && !password.isEmpty()) {
+            serverConfig.setPassword(password);
+        }
+
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder clientConfigBuilder = LettuceClientConfiguration.builder();
+        
+        // Enable TLS/SSL because Upstash uses rediss://
+        if (uri.getScheme() != null && uri.getScheme().equalsIgnoreCase("rediss")) {
+            clientConfigBuilder.useSsl();
+        }
+
+        return new LettuceConnectionFactory(serverConfig, clientConfigBuilder.build());
     }
 
     @Bean
