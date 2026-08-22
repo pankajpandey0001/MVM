@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Portal - Authentication</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="app-container" style="max-width: 500px; margin-top: 60px;">
+    <div class="form-card">
+        <h1 style="font-size: 22px; margin-bottom: 8px; text-align: center;">Enterprise Operations Portal</h1>
+        <p style="color: var(--text-muted); font-size: 14px; text-align: center; margin-bottom: 24px;">Sign in or request merchant onboarding</p>
+
+        <div id="alertBox" style="display: none; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 14px;"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginEmail">Registered Email Address</label>
+                <input type="email" id="loginEmail" required placeholder="admin@domain.com">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Sign In</button>
+        </form>
+
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
+
+        <!-- Switch To Register Form -->
+        <button type="button" id="showRegisterBtn" class="btn btn-secondary" style="width: 100%;">Register as Merchant / Staff</button>
+
+        <!-- Register Form (Hidden by default) -->
+        <form id="registerForm" style="display: none; margin-top: 16px;">
+            <div class="form-group">
+                <label for="regFullName">Full Name</label>
+                <input type="text" id="regFullName" required placeholder="e.g. Pankaj Pandey">
+            </div>
+            <div class="form-group">
+                <label for="regEmail">Work Email Address</label>
+                <input type="email" id="regEmail" required placeholder="pankaj@store.com">
+            </div>
+            <div class="form-group">
+                <label for="regPhone">Indian Mobile Number (10 digits)</label>
+                <input type="tel" id="regPhone" pattern="^[6-9]\d{9}$" required placeholder="9876543210">
+            </div>
+            <div class="form-group">
+                <label for="regRole">Requested Account Role</label>
+                <select id="regRole" required>
+                    <option value="VENDOR">Vendor (Merchant Tier)</option>
+                    <option value="ADMIN">Admin (Operations Tier)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Strong Password</label>
+                <input type="password" id="regPassword" required placeholder="Min 12 chars (Upper, Lower, Num, Special)">
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Send Email OTP Verification</button>
+            <button type="button" id="cancelRegisterBtn" class="btn btn-secondary" style="width: 100%; margin-top: 8px;">Back to Login</button>
+        </form>
+    </div>
+</div>
+
+<!-- OTP Verification Modal -->
+<div id="otpModal" class="modal-overlay modal-hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Enter Email OTP</h2>
+            <button type="button" id="closeOtpModal" class="close-btn">&times;</button>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            A 6-digit verification code has been dispatched to your email address (Valid for 5 minutes).
+        </p>
+        <form id="otpForm">
+            <div class="form-group">
+                <label for="otpCode">6-Digit Code</label>
+                <input type="text" id="otpCode" pattern="^\d{6}$" maxlength="6" required placeholder="123456" style="text-align: center; font-size: 20px; letter-spacing: 4px;">
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Verify & Submit Registration</button>
+        </form>
+    </div>
+</div>
+
+<script src="/js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merchant Central - Operations & Stock Ledger</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app-container">
+    <!-- Header -->
+    <header class="navbar">
+        <h2 style="font-size: 18px;" id="opsHeaderTitle">Vendor Operations</h2>
+        <nav class="nav-links" id="navbarLinks">
+            <a href="/governance.html" id="navGovLink" style="display: none;">Vendor Governance</a>
+            <a href="/operations.html" class="active" id="navOpsLink">Store Operations</a>
+            <a href="/catalog.html">Master Catalog</a>
+            <a href="#" id="logoutBtn">Sign Out</a>
+        </nav>
+    </header>
+
+    <!-- KPI Valuation Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">Valuation at MRP (₹)</div>
+            <div class="kpi-value" id="kpiMrp">&#8377;0.00</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Valuation at Selling Price (₹)</div>
+            <div class="kpi-value" id="kpiSelling">&#8377;0.00</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Active Catalog Items</div>
+            <div class="kpi-value" id="kpiActive">0</div>
+        </div>
+        <div class="kpi-card alert">
+            <div class="kpi-title">Low Stock Items (&lt;= 10 Units)</div>
+            <div class="kpi-value" id="kpiLowStock" style="color: var(--state-rejected);">0</div>
+        </div>
+    </div>
+
+    <!-- Inventory List -->
+    <div class="table-wrapper">
+        <div style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <span id="inventoryHeaderLabel">Vendors Stock</span>
+            <button type="button" class="btn btn-secondary" id="refreshStockBtn" style="padding: 6px 12px; font-size: 13px;">Refresh</button>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Product Id</th>
+                <th>Product Name</th>
+                <th>Price Range</th>
+                <th>Selling Price (₹)</th>
+                <th>Total Stock</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="inventoryTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Stock Movement Adjustment Modal -->
+    <div id="stockModal" class="modal-overlay modal-hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="stockModalTitle">Record Double-Entry Stock Movement</h3>
+                <button type="button" id="closeStockModal" class="close-btn">&times;</button>
+            </div>
+            <form id="stockForm">
+                <input type="hidden" id="stockProductId">
+                <div class="form-group">
+                    <label for="stockEntryType">Entry Type</label>
+                    <select id="stockEntryType" required>
+                        <option value="STOCK_ADD">Add Stock</option>
+                        <option value="STOCK_REMOVE">Remove Stock</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="stockQuantity">Quantity</label>
+                    <input type="number" id="stockQuantity" min="1" required placeholder="e.g. 25">
+                </div>
+                <div class="form-group">
+                    <label for="stockReason">Audit Reference / Explanation</label>
+                    <input type="text" id="stockReason" required placeholder="e.g. Stock Sold">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">UPDATE STOCK</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Price Update Modal -->
+    <div id="priceModal" class="modal-overlay modal-hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Update Selling Price</h3>
+                <button type="button" id="closePriceModal" class="close-btn">&times;</button>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;" id="priceCorridorNotice"></p>
+            <form id="priceForm">
+                <input type="hidden" id="priceProductId">
+                <div class="form-group">
+                    <label for="newSellingPrice">New Selling Price (₹)</label>
+                    <input type="number" id="newSellingPrice" step="0.01" min="0.01" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Save New Price</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Double-Entry Transaction Ledger Table -->
+    <div class="table-wrapper" style="margin-top: 32px;">
+        <div style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border);">
+            All Stock Changes with Reason
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Product & Id</th>
+                <th>Type</th>
+                <th>Quantity Change</th>
+                <th>Resulting Balance</th>
+                <th>Update Reason</th>
+            </tr>
+            </thead>
+            <tbody id="ledgerTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/operations.js"></script>
+<script>
+    // Adjust navbar dynamically for Admin/Superadmin inspection mode
+    document.addEventListener("DOMContentLoaded", () => {
+        if (typeof API !== "undefined" && API.getUserRole) {
+            const role = API.getUserRole();
+            const navGovLink = document.getElementById("navGovLink");
+            const navOpsLink = document.getElementById("navOpsLink");
+            const opsHeaderTitle = document.getElementById("opsHeaderTitle");
+
+            if (role === "ADMIN" || role === "SUPER_ADMIN") {
+                if (navGovLink) {
+                    navGovLink.style.display = "inline-block";
+                    navGovLink.textContent = role === "ADMIN" ? "Vendor Governance" : "User Governance";
+                }
+                if (navOpsLink) {
+                    navOpsLink.style.display = "none"; // Hide direct store operations tab for admins
+                }
+                if (opsHeaderTitle) {
+                    opsHeaderTitle.textContent = "Vendor Inspection Mode";
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

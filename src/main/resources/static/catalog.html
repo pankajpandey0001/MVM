@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Catalog & Category Tree</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app-container">
+    <!-- Navigation -->
+    <header class="navbar">
+        <h2 style="font-size: 18px;">Master Catalog &amp; Category Hub</h2>
+        <nav class="nav-links">
+            <a href="/governance.html" id="navGov" style="display: none;">User Governance</a>
+            <a href="/operations.html" id="navOps" style="display: none;">Store Operations</a>
+            <a href="/catalog.html" class="active">Master Catalog</a>
+            <a href="#" id="logoutBtn">Sign Out</a>
+        </nav>
+    </header>
+
+    <!-- Section A: Cascading Category Creation (Admin / Super Admin Only) -->
+    <div class="form-card" id="adminCategorySection" style="display: none;">
+        <h3 style="margin-bottom: 12px; font-size: 16px;">Add Category (Root or Subcategory)</h3>
+        <form id="categoryForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 140px; gap: 12px; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="catName">Category Name</label>
+                <input type="text" id="catName" required placeholder="e.g. Consumer Electronics">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="catCode">Category Code</label>
+                <input type="text" id="catCode" required placeholder="e.g. ELEC">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="catParent">Parent Category (Optional)</label>
+                <select id="catParent">
+                    <option value="">-- None (Create Root) --</option>
+                </select>
+            </div>
+            <button type="submit" class="btn" style="height: 42px;">Save Category</button>
+        </form>
+    </div>
+
+    <!-- Section B & C: Product Creation / Proposal Form -->
+    <div class="form-card">
+        <h3 style="margin-bottom: 12px; font-size: 16px;" id="productFormTitle">Create New Master Product Blueprint</h3>
+        <form id="productForm">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="prodTitle">Product Title</label>
+                    <input type="text" id="prodTitle" required placeholder="e.g. Mechanical Gaming Keyboard">
+                </div>
+                <div class="form-group">
+                    <label for="prodCategory">Category Binding</label>
+                    <select id="prodCategory" required>
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="prodDesc">Product Description</label>
+                <textarea id="prodDesc" rows="2" placeholder="Detailed product specifications..."></textarea>
+            </div>
+
+            <!-- Price Corridor Grid (Hidden for Vendors during initial proposal) -->
+            <div id="adminPriceCorridorGroup" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                <div class="form-group">
+                    <label for="prodMinPrice">Admin Min Price (₹)</label>
+                    <input type="number" id="prodMinPrice" step="0.01" min="0.01" placeholder="100.00">
+                </div>
+                <div class="form-group">
+                    <label for="prodMrp">Admin MRP (₹)</label>
+                    <input type="number" id="prodMrp" step="0.01" min="0.01" placeholder="250.00">
+                </div>
+            </div>
+            <button type="submit" class="btn" style="width: 100%; margin-top: 8px;" id="saveProductBtn">Submit Product Blueprint</button>
+        </form>
+    </div>
+
+    <!-- Section D: Catalog Feeds -->
+    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button type="button" class="btn" id="tabActiveCatalog">Active Master Catalog</button>
+        <button type="button" class="btn btn-secondary" id="tabApprovalQueue">Vendor Proposals Queue</button>
+        <button type="button" class="btn btn-secondary" id="tabBannedItems">Banned Items Partition</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Price Corridor (Min - MRP)</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="catalogTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+    // Reveal navigation links based on user role
+    document.addEventListener("DOMContentLoaded", () => {
+        if (typeof API !== "undefined" && API.getUserRole) {
+            const role = API.getUserRole();
+            const navGov = document.getElementById("navGov");
+            const navOps = document.getElementById("navOps");
+            const adminCatSection = document.getElementById("adminCategorySection");
+
+            if (role === "SUPER_ADMIN" || role === "ADMIN") {
+                if (navGov) {
+                    navGov.style.display = "inline-block";
+                    navGov.textContent = role === "ADMIN" ? "Vendor Governance" : "User Governance";
+                }
+                if (adminCatSection) {
+                    adminCatSection.style.display = "block";
+                }
+            } else if (role === "VENDOR") {
+                if (navOps) {
+                    navOps.style.display = "inline-block";
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

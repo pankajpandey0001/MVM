@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Governance & Vendor Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app-container">
+    <!-- Navigation -->
+    <header class="navbar">
+        <h2 style="font-size: 18px;" id="headerTitle">Governance Hub</h2>
+        <nav class="nav-links">
+            <a href="/governance" class="active" id="navGovernanceLink">User Governance</a>
+            <a href="/catalog">Master Catalog</a>
+            <a href="#" id="logoutBtn">Sign Out</a>
+        </nav>
+    </header>
+
+    <!-- Segmented Filter Tabs -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;" id="statusTabs"></div>
+
+    <!-- Controls: Role Selector & Refresh -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; gap: 12px; align-items: center;" id="roleFilterContainer">
+            <label for="roleFilter" style="margin-bottom: 0;">Filter Role:</label>
+            <select id="roleFilter" style="width: 160px;">
+                <option value="">All Roles</option>
+                <option value="VENDOR">Vendors</option>
+                <option value="ADMIN">Admins</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-secondary" id="refreshBtn">Refresh Data</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="userTableBody">
+            <tr><td colspan="7" style="text-align: center; color: var(--text-muted, #666);">Loading user records...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Action Reason Modal -->
+    <div id="actionModal" class="modal-overlay modal-hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="actionModalTitle">Update User State</h3>
+                <button type="button" id="closeActionModal" class="close-btn">&times;</button>
+            </div>
+            <form id="actionForm">
+                <input type="hidden" id="targetUserId">
+                <input type="hidden" id="targetState">
+                <div class="form-group">
+                    <label for="actionReason">Message</label>
+                    <textarea id="actionReason" rows="3" required placeholder="State Message & Reason..."></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;" id="confirmActionBtn">Confirm Decision</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Audit Drawer Modal -->
+    <div id="auditModal" class="modal-overlay modal-hidden">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Information</h3>
+                <button type="button" id="closeAuditModal" class="close-btn">&times;</button>
+            </div>
+            <div class="table-wrapper" style="max-height: 350px; overflow-y: auto;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Transition</th>
+                        <th>Message</th>
+                        <th>Performed By</th>
+                    </tr>
+                    </thead>
+                    <tbody id="auditTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Inventory Read-Only Modal -->
+    <div id="vendorInventoryModal" class="modal-overlay modal-hidden">
+        <div class="modal-content" style="max-width: 850px; width: 95%;">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" id="vendorInventoryModalTitle">Vendor Inventory (Read-Only)</h3>
+                    <p id="vendorInventoryModalSubtitle" style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;"></p>
+                </div>
+                <button type="button" id="closeVendorInventoryModal" class="close-btn">&times;</button>
+            </div>
+
+            <!-- Valuation Summary Metrics -->
+            <div class="valuation-grid">
+                <div class="valuation-card">
+                    <span>Valuation (MRP)</span>
+                    <strong id="valMrp">₹0.00</strong>
+                </div>
+                <div class="valuation-card">
+                    <span>Valuation (Selling)</span>
+                    <strong id="valSelling">₹0.00</strong>
+                </div>
+                <div class="valuation-card">
+                    <span>Active SKUs</span>
+                    <strong id="valActive">0</strong>
+                </div>
+                <div class="valuation-card">
+                    <span>Low Stock SKUs</span>
+                    <strong id="valLowStock" style="color: #dc2626;">0</strong>
+                </div>
+            </div>
+
+            <!-- Stock Table -->
+            <div class="table-wrapper" style="max-height: 380px; overflow-y: auto;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Product Title</th>
+                        <th>Category</th>
+                        <th>SKU</th>
+                        <th>Price Corridor</th>
+                        <th>Selling Price</th>
+                        <th>Current Stock</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody id="vendorInventoryTableBody">
+                    <tr><td colspan="7" style="text-align: center;">Loading inventory...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/governance.js"></script>
+<script>
+    // Adjust UI labels immediately based on role
+    document.addEventListener("DOMContentLoaded", () => {
+        if (typeof API !== "undefined" && API.getUserRole) {
+            const role = API.getUserRole();
+            const headerTitle = document.getElementById("headerTitle");
+            const navGovernanceLink = document.getElementById("navGovernanceLink");
+            const roleFilterContainer = document.getElementById("roleFilterContainer");
+
+            if (role === "ADMIN") {
+                if (headerTitle) headerTitle.textContent = "Admin - Vendor Management";
+                if (navGovernanceLink) navGovernanceLink.textContent = "Vendor Governance";
+                if (roleFilterContainer) roleFilterContainer.style.display = "none";
+            } else if (role === "SUPER_ADMIN") {
+                if (headerTitle) headerTitle.textContent = "Super Admin Governance Hub";
+                if (navGovernanceLink) navGovernanceLink.textContent = "User Governance";
+            }
+        }
+    });
+</script>
+</body>
+</html>
