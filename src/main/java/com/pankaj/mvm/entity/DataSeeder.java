@@ -1,4 +1,4 @@
-package com.pankaj.mvm.entity;
+package com.pankaj.mvm.config;
 
 import com.pankaj.mvm.entity.User;
 import com.pankaj.mvm.enums.AccountStatus;
@@ -22,7 +22,7 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // Only seed if the database has no users yet
         if (userRepository.count() == 0) {
-            log.info("Database is empty. Seeding requested demo accounts...");
+            log.info("Database is empty. Seeding active/approved demo accounts...");
 
             // 1. Create 1 Super Admin
             User superAdmin = new User();
@@ -46,7 +46,7 @@ public class DataSeeder implements CommandLineRunner {
                 userRepository.save(admin);
             }
 
-            // 3. Create 4 Vendors
+            // 3. Create 4 Vendors (Fully Active so no approval wall blocks login)
             for (int i = 1; i <= 4; i++) {
                 User vendor = new User();
                 vendor.setFullName("Demo Vendor " + i);
@@ -58,8 +58,7 @@ public class DataSeeder implements CommandLineRunner {
                 userRepository.save(vendor);
             }
 
-            log.info("Successfully seeded: 1 Super Admin, 2 Admins, and 4 Vendors!");
-            log.info("All demo accounts use password: Password@123");
+            log.info("Successfully seeded and activated: 1 Super Admin, 2 Admins, and 4 Vendors!");
         } else {
             log.info("Users already exist in database. Skipping data seeding.");
         }
