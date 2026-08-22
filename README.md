@@ -1,3 +1,12 @@
+Live Link for Demo - https://mvm-mcne.onrender.com/
+            Email Id            Name       Password
+User-1 -> admin1@example.com, Admin One, Pankaj@455161
+User-2 -> admin2@example.com, Admin Two, Pankaj@455161
+User-3 -> vendor1@example.com, Vendor One, Pankaj@455161
+User-4 -> vendor2@example.com, Vendor Two, Pankaj@455161
+User-5 -> vendor3@example.com, Vendor Three, Pankaj@455161
+User-6 -> vendor4@example.com, Vendor Four, Pankaj@455161
+
 # 🚀 Multi-Vendor Inventory Management System
 
 A full-stack web application that allows a central Admin to manage a global product catalog, while allowing multiple independent Vendors to manage their own stock and pricing securely.
