@@ -2,6 +2,8 @@
 
 A full-stack web application that allows a central Admin to manage a global product catalog, while allowing multiple independent Vendors to manage their own stock and pricing securely.
 
+Live Demo Link - https://mvm-mcne.onrender.com/
+
 ### 🔑 Test Credentials
 You can use the following pre-configured accounts to test different roles (Admin vs. Vendor) directly on the live platform:
 
@@ -77,8 +79,8 @@ To keep the system secure and fair, the application enforces these strict rules:
 Because this project relies on external databases, you must have them running on your local machine before starting the application.
 
 1.  **Clone the repository:**
-    `git clone https://github.com/pankajpandey0001/Multi-Vendor-Inventory-Management.git`
-2.  **Start MySQL:** Ensure your local MySQL server is running. Create a database named `inventory_db` (or whatever name is in your application properties).
+    `git clone https://github.com/pankajpandey0001/MVM.git`
+2.  **Start MySQL:** Ensure your local MySQL server is running. Create a database named `mvm_db'.
 3.  **Start Redis:** Ensure your local Redis server is running on the default port (6379).
 4.  **Configure Database Credentials:** Open `src/main/resources/application.properties` and update the MySQL username and password to match your local setup.
 5.  **Run the Backend:** Start the Spring Boot application using your IDE (like IntelliJ/Eclipse) or via the terminal using Maven: `./mvnw spring-boot:run`
