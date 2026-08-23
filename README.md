@@ -79,7 +79,7 @@ To keep the system secure and fair, the application enforces these strict rules:
 Because this project relies on external databases, you must have them running on your local machine before starting the application.
 
 1.  **Clone the repository:**
-    `git clone https://github.com/pankajpandey0001/MVM.git`
+    `git clone https://github.com/pankajpandey0001/Multi-Ventor-Inventory-Management.git`
 2.  **Start MySQL:** Ensure your local MySQL server is running. Create a database named `mvm_db'.
 3.  **Start Redis:** Ensure your local Redis server is running on the default port (6379).
 4.  **Configure Database Credentials:** Open `src/main/resources/application.properties` and update the MySQL username and password to match your local setup.
